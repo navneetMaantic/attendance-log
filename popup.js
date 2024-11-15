@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Hardcoded XPath expression
   const presentXPath = "//span[@tooltip='Present']"; //multi elements
-  const selectedMonthXPath = "//button[contains(@class,'active')]/span";
+  // const selectedMonthXPath = "//button[contains(@class,'active')]/span";
   const monthsXpath = "//div[@aria-label='months']/button"; //7 elements
-  //button[@class='btn btn-link ng-star-inserted active']/span[@class='ng-star-inserted']"; 
 
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.scripting.executeScript({
@@ -40,9 +39,13 @@ document.addEventListener("DOMContentLoaded", () => {
               func: countPresent,
               args: [presentXPath]
             }, async (results) => {
-              const { count, textMonth } = await results[0].result;
+              const { count, textMonth, countMissed } = await results[0].result;
               if (textMonth) {
                 document.getElementById("result").textContent = `Total hrs for ${textMonth}: ${count * 8}`;
+                const messageElement = document.getElementById("message");
+                messageElement.textContent = `Swipe missing for ${countMissed} entry(s)`;
+                // Change text color based on countMissed
+                messageElement.style.color = countMissed > 0 ? 'red' : 'green';
               } else {
                 document.getElementById("message2").textContent = `Failed to fetch selected month`;
               }
@@ -87,18 +90,24 @@ function countPresent(presentXPath) {
   return new Promise((resolve) => {
     // Define a function to retry fetching the selected month
     function getSelectedMonth() {
+      const missedSwipeXPath = "//span[@tooltip='Present | Missing Swipe(s)']";
       const selectedMonthXPath2 = "//button[contains(@class,'active')]/span";
       const textElement = document.evaluate(selectedMonthXPath2, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       const textMonth = textElement ? textElement.textContent : null;
 
       if (textMonth) {
         // Once the month is found, count 'present' elements
-        const iterator = document.evaluate(presentXPath, document, null, XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
+        const iteratorPresent = document.evaluate(presentXPath, document, null, XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
+        const iteratorMissed = document.evaluate(missedSwipeXPath, document, null, XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
         let count = 0;
-        while (iterator.iterateNext()) {
+        let countMissed = 0;
+        while (iteratorPresent.iterateNext()) {
           count++;
         }
-        resolve({ count, textMonth });
+        while (iteratorMissed.iterateNext()) {
+          countMissed++;
+        }
+        resolve({ count, textMonth, countMissed });
       } else {
         // Retry after a short delay if the month isn't found yet
         setTimeout(getSelectedMonth, 500);
