@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "name": "Total billable hours",
+    "version": "1.0",
+    "description": "Displays the total client billable hours of the month on timesheet page.",
+    "permissions": [
+        "scripting",
+        "activeTab"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "/icons/icon16.png",
+            "48": "/icons/icon32.png",
+            "128": "/icons/icon128.png"
+        }
+    },
+    "icons": {
+        "16": "/icons/icon16.png",
+        "48": "/icons/icon32.png",
+        "128": "/icons/icon128.png"
+    }
+}
