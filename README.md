@@ -4,5 +4,6 @@
 
 3. open 'Attendance' page in Keka
 4. run extension
+
 ![image](https://github.com/user-attachments/assets/b671735f-a6a3-4e10-ace5-865e283cbf39)
 
